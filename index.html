@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Type-Ahead</title>
+    </head>
+    <body>
+        <div class="container">
+            <input class="input" value="" placeholder="City or State">
+            <ul class="ul-container">
+                    <li class=" ul-li li-for-state">Filter For State</li>
+                    <li class=" ul-li li-for-city">Filter For City</li>
+             </ul>
+        </div>
+       
+        <style>
+            body{
+                background-color:#ffc600;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+            }
+            .container{
+                background-color: #F7F7F7;
+                margin: auto;
+                margin-left: 50%;
+                margin-top: 3%;
+                transform: translate(-50%, 0px);
+                display: inline-block;
+                width: 409px;
+                height: 115px;
+                border-radius: 9px;
+                box-shadow:0 0 10px rgba(0, 0, 0, 0.14);
+
+            }
+            .input{
+                padding: 9px;
+                position: inherit;
+                padding-left: 102px;
+                margin-top: 13px;
+                margin-left: 13px;
+                height: 70px;
+                width: 270px;
+                font-size: 36px;
+                border: 8px;
+                font-family: sans-serif;
+                outline: 0;
+
+            }
+            .ul-container{
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                width: 300px;
+                transform: translate(-50%, 0);
+                padding: 0;
+                margin: 0;
+            }
+            .ul-container li:nth-child(even){
+                height: 35px;
+                background-color: #F7F7F7;
+                display: inline-block;
+                width: 300px;
+                position: relative;
+                padding-top: 14px;
+                text-align: center;
+                font-size: 14px;
+                font-family: sans-serif;
+                transform: perspective(100px) rotateX(3deg) translateY(2px) scale(1.001);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.14);
+                border-bottom: 1px solid #D8D8D8;
+                background: linear-gradient(to top, #ffffff 0%,#EFEFEF 100%);
+
+            }
+            .ul-container li:nth-child(odd){
+
+                height: 35px;
+                background-color: #F7F7F7;
+                display: block;
+                text-align: center;
+                position: relative;
+                padding-top: 14px;
+                font-size: 14px;
+                font-family: sans-serif;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.14);
+                transform: perspective(100px) rotateX(-3deg) translateY(3px);
+                border-bottom: 1px solid #D8D8D8;
+                background: linear-gradient(to top, #ffffff 0%,#EFEFEF 100%);
+
+                
+            }.pop-span{
+                padding-left: 19px;
+                font-size: 10px;
+                position: absolute;
+                font-family: monospace;
+                color: green;
+            }
+            .highlight{
+               background-color:#ffc600; 
+            }
+
+
+        </style>
+        <script>
+            //ENDPIONT IS THE SOURCE TO THE DATA CONTAINING OUR CTIES AND STATE
+            const endPiont = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+            //create an array where we store the cities
+            const cities = [];
+             // Call the fetch function passing the url of the API as a parameter
+            fetch(endPiont)
+            .then(blob => blob.json())// Your code for handling the data you get from the API
+           .then(data => cities.push(...data) );//the (...)data is used for spreading to enable each individual have its own item in the array
+
+           //create a function to find matches of the of what is typed
+           function findMatches(wordToMatch, cities){
+               return cities.filter(place => {
+                const regex = new RegExp(wordToMatch, 'gi');
+                return place.city.match(regex) || place.state.match(regex);
+               })
+           }
+          
+           function displayMatches(){
+               //creating a matchedArray constants containing the this.value(value-typed-in-input-place-holder and filtering it with the cities)
+                const matchedArray = findMatches(this.value, cities);//this is the filter of what is being typed from the cities array
+                function contains(str1, str2){
+                    return str1.toLowerCase().includes(str2.toLowerCase());
+                }
+
+                function highlight(str, matcher) {
+                    const reg = new RegExp(`(${matcher})`, "gi");
+
+                    str = str.replace(reg, '<span class="highlight">$&</span>')
+                    return str;
+                } 
+
+               //map the matched array to create an html element for each containng the city name,stet and populatiom
+               const html = matchedArray.map(place=>{
+                   return `
+                   <li>
+                   <span>
+                    ${contains(place.city, this.value) ? highlight(place.city, this.value) : place.city},
+                    ${contains(place.state, this.value) ? highlight(place.state, this.value) : place.state}
+                   </span>
+                   <span class="pop-span" >${place.population} </span>
+                   </li>`;
+                   
+               }).join('');
+               console.log(html)
+               htmlLists.innerHTML = html; 
+           }
+           const inputPlaceHolder = document.querySelector(".input");
+           const htmlLists = document.querySelector('.ul-container');  
+           //event listener for key up on input placeholder running the displayMatchesFunction
+           inputPlaceHolder.addEventListener('keyup', displayMatches);
+        </script>
+    </body>
+</html>
